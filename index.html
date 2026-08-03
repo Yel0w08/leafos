@@ -1,1 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tea.run — LeafOS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #080c0a;
+      --bg2:       #0d1410;
+      --bg3:       #111a14;
+      --green:     #3dff8f;
+      --green-dim: #1a6640;
+      --green-mid: #2ab866;
+      --text:      #c0f0d0;
+      --muted:     #4a7a5a;
+      --border:    #1a3326;
+    }
 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── SCANLINE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.08) 3px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2.5rem;
+      background: rgba(8,12,10,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      color: var(--green);
+      letter-spacing: 0.1em;
+    }
+
+    .nav-logo span { color: var(--muted); }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+
+    nav a:hover { color: var(--green); }
+
+    .nav-links { display: flex; gap: 2rem; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+      position: relative;
+    }
+
+    /* animated grid bg */
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--green);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0.8;
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 10vw, 7rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: #fff;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 .accent {
+      color: var(--green);
+      text-shadow: 0 0 40px rgba(61,255,143,0.4);
+    }
+
+    .hero-sub {
+      margin-top: 1.5rem;
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 480px;
+      line-height: 1.7;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-cta {
+      margin-top: 2.5rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.75rem;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: #080c0a;
+      font-weight: 700;
+      border: 2px solid var(--green);
+    }
+
+    .btn-primary:hover {
+      background: transparent;
+      color: var(--green);
+      box-shadow: 0 0 20px rgba(61,255,143,0.2);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 2px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--green-dim);
+      color: var(--text);
+    }
+
+
+    .terminal {
+      margin-top: 3rem;
+      position: relative;
+      z-index: 1;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: min(480px, 90vw);
+      overflow: hidden;
+      text-align: left;
+    }
+
+    .terminal-bar {
+      background: var(--bg3);
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: var(--green); }
+
+    .terminal-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .terminal-body {
+      padding: 1.25rem 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 2;
+    }
+
+    .t-green { color: var(--green); }
+    .t-muted { color: var(--muted); }
+    .t-white { color: #fff; }
+
+    .cursor {
+      display: inline-block;
+      width: 8px; height: 14px;
+      background: var(--green);
+      vertical-align: middle;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── SECTIONS ── */
+    section {
+      padding: 5rem 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--green);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      opacity: 0.7;
+    }
+
+    h2 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 560px;
+      line-height: 1.8;
+    }
+
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .feature-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.5rem;
+      transition: border-color 0.2s;
+    }
+
+    .feature-card:hover { border-color: var(--green-dim); }
+
+    .feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+
+    .feature-card p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── CHAIN ── */
+    .chain {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 2.5rem;
+    }
+
+    .chain-node {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .chain-node .icon { color: var(--green); margin-right: 0.4rem; }
+
+    .chain-arrow {
+      color: var(--green-dim);
+      font-size: 1.2rem;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0 2rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 2.5rem 2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    footer a { color: var(--green-dim); text-decoration: none; }
+    footer a:hover { color: var(--green); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .chain { flex-direction: column; align-items: flex-start; }
+      .chain-arrow { transform: rotate(90deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cursor { animation: none; opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">tea<span>.</span>run <span>/ leafos emulator</span></div>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#gameplay">Gameplay</a>
+    <a href="https://pikmintea.itch.io/teadotrun" target="_blank">Download</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Made by PikminTea</div>
+  <h1>tea<span class="accent">.run</span></h1>
+  <p class="hero-sub">
+    A CLicker Game (incremental game) Where you can Build your tea empire one leaf at a time.
+  </p>
+  <div class="hero-cta">
+    <a href="https://pikmintea.itch.io/teadotrun" target="_blank" class="btn btn-primary">Play on itch.io</a>
+    <a href="#about" class="btn btn-ghost">Learn more</a>
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <div class="terminal-title">LeafOS v0.1 — Surfy Browser</div>
+    </div>
+    <div class="terminal-body">
+      <div><span class="t-muted">$</span> <span class="t-green">surfy</span> <span class="t-white">teanet://factory</span></div>
+      <div><span class="t-muted">connecting to TeaNet...</span></div>
+      <div><span class="t-green">✓</span> <span class="t-white">Tea Factory unlocked</span></div>
+      <div><span class="t-muted">leaves/s  </span><span class="t-green">+42.0</span></div>
+      <div><span class="t-muted">tea/s     </span><span class="t-green">+8.3</span></div>
+      <div><span class="t-muted">&gt;</span> <span class="cursor"></span></div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-label">// what is this</div>
+  <h2>A clicker inside a fake OS</h2>
+  <p class="lead">
+    Tea.run is an idle clicker game running on LeafOS — a fictional operating system dedicated to tea production.
+    Click leaves, unlock factories, navigate TeaNet through Surfy, and scale your operation from a single bush to an industrial tea empire.
+  </p>
+
+  <div class="features">
+    <div class="feature-card">
+      <div class="feature-icon">🍃</div>
+      <h3>Leaf Factory</h3>
+      <p>Your starting point. Click to harvest leaves, unlock auto-collectors, and scale your raw material output.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💧</div>
+      <h3>Water Factory</h3>
+      <p>Unlock water production to fuel the brewing process. A key resource on the path to industrial tea.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">☕</div>
+      <h3>Tea Factory</h3>
+      <p>Combine leaves and water to brew tea at scale. Upgrade your production line via the TeaNet portal.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🌐</div>
+      <h3>Surfy / TeaNet</h3>
+      <p>An in-game browser giving access to the TeaNet — a network of factory dashboards and unlock nodes.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+
+<section id="gameplay">
+  <div class="section-label">// production chain</div>
+  <h2>How it works</h2>
+  <p class="lead">Every cup of tea starts with a click. Scale up through the production chain to automate your empire.</p>
+
+<h5>This Website is a Work in progress </h5>
+
+</section>
+
+<hr class="divider" />
+
+
+<section>
+  <div class="section-label">// built with</div>
+  <h2>Tech stack</h2>
+  <p class="lead">
+    Built in <mono>C#</mono> with <mono>ImGui.NET</mono> and <mono>Silk.NET</mono> for cross-platform OpenGL rendering.
+    Runs natively on Windows and Linux.
+  </p>
+</section>
+
+<footer>
+  <p>Tea.run / LeafOS — a <a href="https://pikmintea.github.io" target="_blank">PikminTea</a> project &nbsp;·&nbsp;
+  <a href="https://pikmintea.itch.io/teadotrun" target="_blank">itch.io</a></p>
+  <p style="margin-top:0.5rem; opacity:0.5;">made with too much <s>caffeine</s> tea</p>
+</footer>
+
+</body>
+</html>
